@@ -21,7 +21,11 @@ package edu.nmsu.cs.webserver;
  *
  **/
 
+ import java.io.File;
+import java.io.FileInputStream;
 import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -32,7 +36,7 @@ import java.util.TimeZone;
 
 public class WebWorker implements Runnable
 {
-
+	//String filepath = "Hello";
 	private Socket socket;
 
 	/**
@@ -55,9 +59,9 @@ public class WebWorker implements Runnable
 		{
 			InputStream is = socket.getInputStream();
 			OutputStream os = socket.getOutputStream();
-			readHTTPRequest(is);
-			writeHTTPHeader(os, "text/html");
-			writeContent(os);
+			String filepath = readHTTPRequest(is);
+			writeHTTPHeader(os, filepath, "text/html");
+			writeContent(os, filepath);
 			os.flush();
 			socket.close();
 		}
@@ -72,8 +76,8 @@ public class WebWorker implements Runnable
 	/**
 	 * Read the HTTP request header.
 	 **/
-	private void readHTTPRequest(InputStream is)
-	{
+	private String readHTTPRequest(InputStream is) {
+		String filepath = "";
 		String line;
 		BufferedReader r = new BufferedReader(new InputStreamReader(is));
 		while (true)
@@ -82,10 +86,19 @@ public class WebWorker implements Runnable
 			{
 				while (!r.ready())
 					Thread.sleep(1);
+
 				line = r.readLine();
 				System.err.println("Request line: (" + line + ")");
+
+				if(line.length() > 13)
+					if(line.substring(0,3).equals("GET")) {
+						filepath = line.substring(5, line.indexOf("HTTP/1.1"));
+						
+					}//end if
+
 				if (line.length() == 0)
 					break;
+
 			}
 			catch (Exception e)
 			{
@@ -93,7 +106,14 @@ public class WebWorker implements Runnable
 				break;
 			}
 		}
-		return;
+		if(filepath.length() <= 1)
+			return "index.html";
+		
+		File tempFile = new File(filepath);
+		if(!tempFile.exists())
+			return "404.html";
+
+		return filepath;
 	}
 
 	/**
@@ -104,16 +124,22 @@ public class WebWorker implements Runnable
 	 * @param contentType
 	 *          is the string MIME content type (e.g. "text/html")
 	 **/
-	private void writeHTTPHeader(OutputStream os, String contentType) throws Exception
+	private void writeHTTPHeader(OutputStream os, String filepath, String contentType) throws Exception
 	{
+		if(filepath.contains(".png"))
+			contentType = "image/png";
+
 		Date d = new Date();
 		DateFormat df = DateFormat.getDateTimeInstance();
 		df.setTimeZone(TimeZone.getTimeZone("GMT"));
-		os.write("HTTP/1.1 200 OK\n".getBytes());
+		if(filepath.equals("404.html"))
+		    os.write("HTTP/1.1 404 NOT FOUND\n".getBytes());
+		else
+		    os.write("HTTP/1.1 200 OK\n".getBytes());
 		os.write("Date: ".getBytes());
 		os.write((df.format(d)).getBytes());
 		os.write("\n".getBytes());
-		os.write("Server: Jon's very own server\n".getBytes());
+		os.write("Server: Joeys very own server\n".getBytes());
 		// os.write("Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\n".getBytes());
 		// os.write("Content-Length: 438\n".getBytes());
 		os.write("Connection: close\n".getBytes());
@@ -130,11 +156,13 @@ public class WebWorker implements Runnable
 	 * @param os
 	 *          is the OutputStream object to write to
 	 **/
-	private void writeContent(OutputStream os) throws Exception
-	{
-		os.write("<html><head></head><body>\n".getBytes());
-		os.write("<h3>My web server works!</h3>\n".getBytes());
-		os.write("</body></html>\n".getBytes());
-	}
+	private void writeContent(OutputStream os, String filepath) throws Exception {
 
+		 String line;
+		 BufferedReader br = new BufferedReader(new FileReader(filepath));	
+		 while((line = br.readLine()) != null)
+			os.write(line.getBytes());
+		 br.close();
+
+	}//end write content
 } // end class

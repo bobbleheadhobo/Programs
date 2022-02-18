@@ -1,0 +1,28 @@
+<project name="WebServer" default="main" basedir=".">
+
+	<!-- global properties -->
+    <property name="src"      value="src"/>
+    <property name="bin"      value="bin"/>
+    <property name="jar"  value="${bin}/jar"/>
+
+    <target name="clean">
+        <delete dir="${bin}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${bin}"/>
+        <javac srcdir="${src}" destdir="${bin}"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar}"/>
+        <jar destfile="${jar}/WebServer.jar" basedir="${bin}"/>
+    </target>
+
+    <target name="run" depends="jar">
+        <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true"/>
+    </target>
+
+    <target name="main" depends="clean,run"/>
+
+</project>

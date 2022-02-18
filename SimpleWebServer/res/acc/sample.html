@@ -1,0 +1,20 @@
+<html>
+<head>
+</head>
+<body>
+<p>Hello world, the current date is: <span id='CS371Date'></span>. The server is: <span id='CS371Server'></span>.</p>
+</body>
+</html>
+
+<script>
+    var d = new Date();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var month = months[d.getMonth()];
+    var day = d.getDate();
+    var year = d.getFullYear();
+    var today = month + ' ' + day + ', ' + year;
+    document.getElementById('CS371Date').innerHTML=today;
+    var server = "Joey's Server";
+    document.getElementById('CS371Server').innerHTML=server;
+    //window.alert("Glizzy Hands");
+</script>
