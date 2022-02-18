@@ -1,1 +1,16 @@
-p1Questions
+SimpleWebServer version 1.0
+Time for completion: roughly 4 hours
+
+2. Estimate the time it took you to complete the assignment, broken down as:
+
+Thought/Design:
+1.5 hours
+
+Programming:
+2.5 hours
+
+Debugging:
+2 hours
+
+TOTAL: 6 hours ______________________
+3. To within what percent accuracy was your original estimate: 80% accurate
