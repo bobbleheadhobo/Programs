@@ -36,8 +36,8 @@ import java.util.TimeZone;
 
 public class WebWorker implements Runnable
 {
-	//String filepath = "Hello";
 	private Socket socket;
+	private String imgTypes[] = {".png",".jpg",".gif", ".jpeg", ".ico"};
 
 	/**
 	 * Constructor: must have a valid open socket
@@ -69,7 +69,7 @@ public class WebWorker implements Runnable
 		{
 			System.err.println("Output error: " + e);
 		}
-		System.err.println("Done handling connection.");
+		System.err.println("Done handling connection.\n");
 		return;
 	}
 
@@ -107,11 +107,11 @@ public class WebWorker implements Runnable
 			}
 		}
 		if(filepath.length() <= 1)
-			return "index.html";
+			return "www/index.html";
 		
 		File tempFile = new File(filepath);
 		if(!tempFile.exists())
-			return "404.html";
+			return "www/404.html";
 
 		return filepath;
 	}
@@ -126,16 +126,24 @@ public class WebWorker implements Runnable
 	 **/
 	private void writeHTTPHeader(OutputStream os, String filepath, String contentType) throws Exception
 	{
-		if(filepath.contains(".png"))
-			contentType = "image/png";
+		//checks if requested file is image type
+		if(!filepath.endsWith(".html"))
+			for(int i = 0; i < imgTypes.length; i++)
+				if(filepath.endsWith(".jpg")) {
+					contentType = "image/" + imgTypes[i].substring(1);
+					break;
+			}//end if
 
 		Date d = new Date();
 		DateFormat df = DateFormat.getDateTimeInstance();
 		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		
+		//writes if file found or not
 		if(filepath.equals("404.html"))
 		    os.write("HTTP/1.1 404 NOT FOUND\n".getBytes());
 		else
 		    os.write("HTTP/1.1 200 OK\n".getBytes());
+
 		os.write("Date: ".getBytes());
 		os.write((df.format(d)).getBytes());
 		os.write("\n".getBytes());
@@ -158,11 +166,44 @@ public class WebWorker implements Runnable
 	 **/
 	private void writeContent(OutputStream os, String filepath) throws Exception {
 
-		 String line;
-		 BufferedReader br = new BufferedReader(new FileReader(filepath));	
-		 while((line = br.readLine()) != null)
-			os.write(line.getBytes());
-		 br.close();
+		// check if .html file then reads in and writes out html files
+		String line;
+		filepath = filepath.trim(); //removes whitespace in front and back of string
+		if(filepath.endsWith(".html")) {
+		   BufferedReader br = new BufferedReader(new FileReader(filepath));	
+		   while((line = br.readLine()) != null)
+		      os.write(line.getBytes());
+		   br.close();
+		   System.err.println("Website file type: " + filepath);
+		   return;
+		}//end if
 
+		//checks if image file then reads in and writes out the images file bytes
+		else 
+			for(String img : imgTypes) {
+			    if(filepath.endsWith(img)) {
+        			try {
+						InputStream is = new FileInputStream(filepath);
+            			long fileSize = new File(filepath).length();
+            			byte[] allBytes = new byte[(int) fileSize];
+ 						int bytesRead = is.read(allBytes);
+ 
+            			os.write(allBytes, 0, bytesRead);
+						is.close();
+						System.err.println("Image file type: " + filepath);
+						return;
+        				}//end try
+						catch (IOException ex) {
+            			   ex.printStackTrace();
+        				}//end catch
+				}//end if
+			}//end for
+
+			//if reaches here then the server understood the request but it is not an allowed file type or requsted a folder
+			BufferedReader br = new BufferedReader(new FileReader("www/403.html"));	
+			while((line = br.readLine()) != null)
+			   os.write(line.getBytes());
+			br.close();
+			System.err.println("Forbidden file: " + filepath);
 	}//end write content
 } // end class

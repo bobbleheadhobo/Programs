@@ -23,6 +23,6 @@
         <java classpath="bin" classname="edu.nmsu.cs.webserver.WebServer" fork="true"/>
     </target>
 
-    <target name="main" depends="clean,run"/>
+    <target name="main" depends="clean, run"/>
 
 </project>

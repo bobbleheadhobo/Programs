@@ -1,1 +1,5 @@
 p2Questions
+Thought/Design: 2 hours
+Programming: 3 hours
+Debugging: 2 hours
+TOTAL: 7 hours
