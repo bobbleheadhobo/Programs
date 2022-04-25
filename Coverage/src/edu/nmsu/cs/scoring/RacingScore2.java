@@ -64,7 +64,7 @@ public class RacingScore2
 	public static void main(String args[])
 	{
 		int s1, s2, s3;
-		if (args == null || args.length != 3)
+		if (args.length != 3) //args will never be null
 		{
 			System.err.println("Error: must supply three arguments!");
 			return;
@@ -74,6 +74,7 @@ public class RacingScore2
 			s1 = Integer.parseInt(args[0]);
 			s2 = Integer.parseInt(args[1]);
 			s3 = Integer.parseInt(args[2]);
+			
 		}
 		catch (Exception e)
 		{
